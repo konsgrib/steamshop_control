@@ -22,3 +22,4 @@ Connect :(Chip -> Rpi) SCk -> SCLK, CS -> CE0, SO -> MISO
 HC-SR04 sensor
 https://www.anavi.org/article/209/
 https://www.youtube.com/watch?v=ShnzQSFwVXQ
+# steamshop_control
