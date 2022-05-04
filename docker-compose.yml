@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  app:
+    build: 
+      context: ./app
+    container_name: app
+    restart: unless-stopped
+    # ports:
+    # - "8000:8000"
+    privileged: true
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - app
