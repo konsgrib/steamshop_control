@@ -1,5 +1,5 @@
 # Seamshop controll
-using Raspberry Pi as a host for sensots and API
+Using Raspberry Pi as a host for sensots and API
 - MAX6675K termocouple to measure chimney temperature
 - DS16b20 sendors to measure boiler temperature and water temperature in the heating system and in the heating batteries 
 - HC-SR04 sensor to measure level of the pellets inside the pellet bunker

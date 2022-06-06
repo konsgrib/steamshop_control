@@ -5,10 +5,13 @@ from fastapi import FastAPI
 from termo import read_temp, read_max
 
 from sonar import get_distance
+
+from schemas.termo import TermoResponse
+
 app = FastAPI()
 
 
-@app.get('/temperature')
+@app.get('/temperature',response_model=TermoResponse)
 def get_temperature():
     return {
         'temperature': read_temp(),

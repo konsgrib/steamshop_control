@@ -1,0 +1,24 @@
+{
+    "sensors": [
+        {
+            "name": "water",
+            "address": "28-031724a3cbff",
+            "type": "ds18b20"
+        },
+        {
+            "name": "boiler",
+            "addess": "28-0417301b9dff",
+            "type": "ds18b20"
+        },
+        {
+            "name": "chimney",
+            "addess": "SPI",
+            "type": "max6675K"
+        },
+        {
+            "name": "bunker",
+            "addess": "I2C",
+            "type": "hs-sp04"
+        }
+    ]
+}
