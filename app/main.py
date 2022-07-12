@@ -50,10 +50,8 @@ def get_sensors_list():
     return SensorList(sensors = lines)
 
 
-
-
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # get_temperature()
-    print(read_temp())
+    # print(read_temp())
     # print( read_max())
-    print(get_distance())
+    # print(get_distance())

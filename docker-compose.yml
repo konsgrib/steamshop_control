@@ -6,8 +6,9 @@ services:
       context: ./app
     container_name: app
     restart: unless-stopped
-    # ports:
-    # - "8000:8000"
+    depends_on:
+      pg:
+        condition: service_healthy
     privileged: true
   nginx:
     build: ./nginx
@@ -17,3 +18,22 @@ services:
       - "80:80"
     depends_on:
       - app
+  pg:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: steamshop
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: Config#123Pass!
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 7s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:

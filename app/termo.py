@@ -12,21 +12,24 @@ os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
 
-base_dir = '/sys/bus/w1/devices/'
-device_folder = glob.glob(base_dir + '28*')[0]
-device_file = device_folder + '/w1_slave'
+BASE_DIR = '/sys/bus/w1/devices/'
+DEVICE_FOLDER = glob.glob(BASE_DIR + '28*')[0]
+DEVICE_FILE = DEVICE_FOLDER + '/w1_slave'
 
 # max31855 related conf 
-spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-cs = digitalio.DigitalInOut(board.D5)
-max31855 = adafruit_max31855.MAX31855(spi, cs)
+SPI = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+CS = digitalio.DigitalInOut(board.D5)
+MAX31855 = adafruit_max31855.MAX31855(SPI, CS)
 
 # DS18B20 sensor related code
 def read_temp_raw():
-    f = open(device_file, 'r')
-    lines = f.readlines()
-    f.close()
-    return lines
+    try:
+        f = open(DEVICE_FILE, 'r')
+        lines = f.readlines()
+        f.close()
+        return lines
+    except:
+        raise Exception( f"Pleae check if {DEVICE_FILE} exists")
  
 def read_temp():
     lines = read_temp_raw()
@@ -42,12 +45,12 @@ def read_temp():
 # MAX 6675 K related code
 def read_max():
     GPIO.setmode(GPIO.BCM)
-    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    cs = digitalio.DigitalInOut(board.D5)
-    max31855 = adafruit_max31855.MAX31855(spi, cs)
+    SPI = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    CS = digitalio.DigitalInOut(board.D5)
+    MAX31855 = adafruit_max31855.MAX31855(SPI, CS)
     val = 0
     for i in range(10):
-        val +=  max31855.temperature
+        val +=  MAX31855.temperature
         time.sleep(0.2)
     return val / 10
 
