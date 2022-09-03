@@ -7,6 +7,10 @@ Using Raspberry Pi as a host for sensots and API
 to run as a daemon
 docker-compose up --build -d
 
+to run separately FASTAPI container:
+uvicorn main:app  --reload --host 0.0.0.0 --port 8000
+
+
 ## Some hints
 ### ds18b20: 
 https://www.circuitbasics.com/raspberry-pi-ds18b20-temperature-sensor-tutorial/
@@ -22,4 +26,5 @@ Connect :(Chip -> Rpi) SCk -> SCLK, CS -> CE0, SO -> MISO
 ### HC-SR04 sensor
 https://www.anavi.org/article/209/
 https://www.youtube.com/watch?v=ShnzQSFwVXQ
+
 
