@@ -3,11 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heating status</title>
-    <script src="script.js" defer></script>
+    <title>Colored Horizontal Bars</title>
+    <style>
+        .bar-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .label {
+            width: 150px; /* Adjust width as needed */
+            padding-right: 10px;
+            text-align: right;
+        }
+        .bar {
+            height: 20px; /* Set the height of the bars */
+            flex-grow: 1;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white; /* Text color for better visibility */
+            font-weight: bold;
+        }
+        .dark-blue {
+            background-color: darkblue;
+        }
+        .light-blue {
+            background-color: lightblue;
+            color: black; /* Dark text for better visibility on light background */
+        }
+        .pink {
+            background-color: pink;
+            color: black; /* Dark text for better visibility on light background */
+        }
+        .red {
+            background-color: red;
+        }
+    </style>
 </head>
 <body>
-    <h1>Heating status</h1>
-    <div id="report"></div>
+    <div id="bars"></div>
+    <!-- <div id="report"></div> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const barsContainer = document.getElementById('bars');
+            // const reportDiv = document.getElementById('report');
+
+            async function fetchDataAndUpdateBars() {
+                try {
+                    const statusResponse = await fetch('/api/status');
+                    const statusData = await statusResponse.json();
+
+                    // Clear existing bars
+                    barsContainer.innerHTML = '';
+
+                    // reportDiv.innerHTML = `
+                    //     <h2>Status</h2>
+                    //     <pre>${JSON.stringify(statusData, null, 2)}</pre>
+                    // `;
+
+                    function getColor(value) {
+                        if (value <= 10) return 'dark-blue';
+                        if (value > 10 && value <= 30) return 'light-blue';
+                        if (value > 30 && value <= 50) return 'pink';
+                        return 'red';
+                    }
+
+                    function createBar(sensor, value) {
+                        const barContainer = document.createElement('div');
+                        barContainer.className = 'bar-container';
+
+                        const label = document.createElement('span');
+                        label.className = 'label';
+                        label.textContent = sensor;
+
+                        const bar = document.createElement('div');
+                        bar.className = `bar ${getColor(value)}`;
+                        bar.style.width = '100%'; // Make all bars the same width
+
+                        const valueSpan = document.createElement('span');
+                        valueSpan.textContent = value;
+
+                        bar.appendChild(valueSpan);
+                        barContainer.appendChild(label);
+                        barContainer.appendChild(bar);
+
+                        return barContainer;
+                    }
+
+                    statusData.forEach(item => {
+                        const barElement = createBar(item.sensor, item.value);
+                        barsContainer.appendChild(barElement);
+                    });
+
+                } catch (error) {
+                    // reportDiv.innerHTML = `<p>Error fetching data: ${error}</p>`;
+                    console.error('Error fetching data:', error);
+                }
+            }
+
+            // Fetch data and update bars every 5 seconds
+            fetchDataAndUpdateBars();
+            setInterval(fetchDataAndUpdateBars, 5000);
+        });
+    </script>
 </body>
 </html>
