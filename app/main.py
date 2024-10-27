@@ -1,24 +1,12 @@
 import os
-from typing import Optional
+from temperature import SensorDS, SensorMAX
+from distance import SensorSonar
 
 from fastapi import FastAPI
-
-from termo import read_temp, read_max
-
-from sonar import get_distance
-
-from schemas.termo import TermoResponse, SensorList, Sensor
 from fastapi.middleware.cors import CORSMiddleware
+from schemas.termo import TermoResponse, SensorList, Sensor
 
 app = FastAPI()
-
-# origins = [
-#     "http://localhost.tiangolo.com",
-#     "https://localhost.tiangolo.com",
-#     "http://localhost",
-#     "http://localhost:8080",
-#     "http://localhost:8081",
-# ]
 
 origins = ["*"]
 
@@ -31,48 +19,49 @@ app.add_middleware(
 )
 
 
-@app.get("/temperature", response_model=TermoResponse)
-def get_temperature():
-    return {
-        "temperature": read_temp(),
-        "chimney": read_max(),
-        "distance": get_distance(),
+@app.get("/sensors")
+def get_list_of_ds18b20():
+    ds_device_dir = "/sys/bus/w1/devices/"
+    items = os.listdir(ds_device_dir)
+    filtered_items = [item for item in items if item.startswith("28-")]
+    return filtered_items
+
+
+@app.get("/status")
+def main():
+    ids = {
+        "28-35b6d446f62b": "boiler",
+        "28-0417301b9dff": "heat-out",
+        "28-0214811929ff": "heat-in",
+        "D5": "chmney",
+        "18, 24": "pellet-level",
     }
 
+    object_list = []
+    ds_list = get_list_of_ds18b20()
+    sensor_ds_objects = [SensorDS(sensor_id) for sensor_id in ds_list]
+    try:
+        temp_max = SensorMAX("D5")
+        sensor_ds_objects.append(temp_max)
+    except Exception as e:
+        print("Failed to create MAX", str(e))
+    try:
+        dist_sens = SensorSonar(18, 24)
+        sensor_ds_objects.append(dist_sens)
+    except Exception as e:
+        print("Failed to create Sonar", str(e))
 
-def get_device_address(sensor_file):
-    with open(sensor_file, "r") as f:
-        line = f.readline().rstrip()
-    return line.split(":")[0].strip()
+    for item in sensor_ds_objects:
+        object_list.append(
+            {
+                "sensor": ids.get(item.device_id),
+                "value": item.get_data(),
+                "device_id": item.device_id,
+            }
+        )
 
-
-def get_device_temperature(sensor_file):
-    with open(sensor_file, "r") as f:
-        line = f.readlines()[1].rstrip()
-    return float(line.split("t=")[-1].strip()) / 1000
-
-
-@app.get("/sensors", response_model=SensorList)
-def get_sensors_list():
-    lines = []
-    sensors_path = "/sys/bus/w1/devices"
-    master_file = "/sys/bus/w1/devices/w1_bus_master1/w1_master_slaves"
-    with open(master_file, "r") as f:
-        for line in f:
-            sensor_file = os.path.join(sensors_path, line.strip(), "w1_slave")
-            sensor = Sensor(
-                id=line.strip(),
-                name="",
-                type="ds18d20",
-                address=get_device_address(sensor_file),
-                temperature=get_device_temperature(sensor_file),
-            )
-            lines.append(sensor)
-    return SensorList(sensors=lines)
+    return object_list
 
 
-# if __name__ == "__main__":
-# get_temperature()
-# print(read_temp())
-# print( read_max())
-# print(get_distance())
+if __name__ == "__main__":
+    main()

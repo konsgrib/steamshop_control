@@ -7,5 +7,5 @@ camera.resolution = (2592, 1944)
 camera.framerate = 15
 camera.start_preview()
 sleep(5)
-camera.capture('imageMAX_BR.jpg')
+camera.capture("imageMAX_BR.jpg")
 camera.stop_preview()

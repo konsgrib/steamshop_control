@@ -16,14 +16,16 @@ class SensorDS(SensorABC):
         self.device_id = device_id
         self.device_path = "/sys/bus/w1/devices/"
         try:
-            self.device_file = f"{glob.glob(self.device_path + self.device_id)[0]}/w1_slave"
+            self.device_file = (
+                f"{glob.glob(self.device_path + self.device_id)[0]}/w1_slave"
+            )
         except:
             self.device_file = None
 
     def _read_sensor_data_raw(self):
         with open(self.device_file, "r") as f:
             lines = f.readlines()
-        return lines    
+        return lines
 
     def get_data(self) -> float:
         try:
@@ -42,19 +44,23 @@ class SensorDS(SensorABC):
         except Exception as e:
             print(str(e))
             return -1000000
-    
-        
+
+
 class SensorMAX(SensorABC):
     def __init__(self, pin_name) -> None:
         GPIO.setmode(GPIO.BCM)
+        self.pin_name = pin_name
         self.spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-        self.cs = digitalio.DigitalInOut(getattr(board, pin_name))
+        self.cs = digitalio.DigitalInOut(getattr(board, self.pin_name))
         self.device = adafruit_max31855.MAX31855(self.spi, self.cs)
 
     def get_data(self):
         val = 0
         for i in range(10):
-            val +=  self.device.temperature
+            val += self.device.temperature
             time.sleep(0.2)
         return val / 10
 
+    @property
+    def device_id(self):
+        return self.pin_name

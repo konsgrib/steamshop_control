@@ -1,39 +1,30 @@
-version: '3.7'
+version: '3.8'
 
 services:
   app:
-    build: 
+    build:
       context: ./app
-    container_name: app
-    restart: unless-stopped
-    depends_on:
-      pg:
-        condition: service_healthy
+      dockerfile: Dockerfile.app
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+    devices:
+      - /dev/spidev0.0:/dev/spidev0.0
+      - /dev/mem:/dev/mem
     privileged: true
+    
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.nginx
     container_name: nginx
-    restart: unless-stopped
     ports:
       - "80:80"
-    depends_on:
-      - app
-  pg:
-    image: postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: steamshop
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: Config#123Pass!
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data/pgdata
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
-      interval: 7s
-      timeout: 5s
-      retries: 5
-volumes:
-  db-data:
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

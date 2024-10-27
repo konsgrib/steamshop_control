@@ -5,6 +5,7 @@ import sys
 
 from sensor import SensorABC
 
+
 class SensorSonar(SensorABC):
     def __init__(self, pin_trigger: int, pin_echo: int) -> None:
         self.pin_trigger = pin_trigger
@@ -20,8 +21,12 @@ class SensorSonar(SensorABC):
         while 0 == GPIO.input(self.pin_echo):
             start_time = time.time()
         while 1 == GPIO.input(self.pin_echo):
-            stop_time = time.time()        
-        
+            stop_time = time.time()
+
         time_elapsed = stop_time - start_time
         distance = (time_elapsed * 34300) / 2
         return int(distance)
+
+    @property
+    def device_id(self):
+        return f"{self.pin_trigger}, {self.pin_echo}"
